@@ -1,33 +1,131 @@
 Data Splitting Functions
-A series of test/training partitions are created using createDataPartition while createResample creates one or more bootstrap samples. createFolds splits the data into kgroups while createTimeSlices creates cross-validation sample information to be used with time series data.
-Keywords
-utilities
-Usage
+A series of test/training partitions are created using createDataPartition while createResample creates one or more bootstrap samples.
+createFolds splits the data into kgroups while createTimeSlices creates cross-validation sample information to be used with time series data.
+
 createDataPartition(y, times = 1, p = 0.5, list = TRUE, groups = min(5, length(y)))
 
 createFolds(y, k = 10, list = TRUE, returnTrain = FALSE)
 
 createTimeSlices(y, initialWindow, horizon = 1, fixedWindow = TRUE, skip = 0)
+
 Arguments
-y
-a vector of outcomes. For createTimeSlices, these should be in chronological order.
-times
-the number of partitions to create
-p
-the percentage of data that goes to training
-list
-logical - should the results be in a list (TRUE) or a matrix with the number of rows equal to floor(p * length(y)) and times columns.
-groups
-for numeric y, the number of breaks in the quantiles (see below)
-k
-an integer for the number of folds.
-returnTrain
-a logical. When true, the values returned are the sample positions corresponding to the data used during training. This argument only works in conjunction with list = TRUE
-initialWindow
-The initial number of consecutive values in each training set sample
-horizon
-The number of consecutive values in test set sample
-fixedWindow
-A logical: if FALSE, the training set always start at the first sample.
-skip
-An integer specifying how many (if any) resamples to skip to thin the total amount.
+y  a vector of outcomes. For createTimeSlices, these should be in chronological order.
+times  the number of partitions to create
+p  the percentage of data that goes to training
+list  logical - should the results be in a list (TRUE) or a matrix with the number of rows equal to floor(p * length(y)) and times columns.
+groups   for numeric y, the number of breaks in the quantiles (see below)
+k  an integer for the number of folds.
+returnTrain  a logical. When true, the values returned are the sample positions corresponding to the data used during training. 
+This argument only works in conjunction with list = TRUE
+initialWindow The initial number of consecutive values in each training set sample
+horizon The number of consecutive values in test set sample
+fixedWindow A logical: if FALSE, the training set always start at the first sample.
+skip An integer specifying how many (if any) resamples to skip to thin the total amount.
+
+1.# example for createDataPartition
+
+> library(caret)
+> library(kernlab)
+> data(spam)
+# load packages and data
+> inTrain<-createDataPartition(y=spam$type,p=0.75,list=FALSE)
+# create training set indexes with 75% of data, p=0.75 = percent of data that will be for training the model
+# matrix is easier to subset the data with, so list = FALSE is generally what is used
+> training<-spam[inTrain,]
+# subset spam data to training
+>  testing<-spam[-inTrain,]
+# subset spam data (the rest) to test
+> dim(training)
+[1] 3451   58
+> dim(spam)
+[1] 4601   58
+> rbind("original dataset"=dim(spam),"training set"=dim(training))
+                 [,1] [,2]
+original dataset 4601   58
+training set     3451   58
+# dimension of original and training dataset
+
+2.# createFolds(y=data$var, k=10, list=TRUE, returnTrain=TRUE) = slices the data in to k folds
+for cross validation and returns k lists of indices
+> set.seed(32323)
+> folds<-createFolds(y=spam$type,k=10,list=TRUE,returnTrain=TRUE)
+# create 10 folds for cross validation and return the training set indices
+> sapply(folds,length)
+Fold01 Fold02 Fold03 Fold04 Fold05 Fold06 Fold07 Fold08 Fold09 Fold10 
+  4141   4140   4141   4142   4140   4142   4141   4141   4140   4141 
+> str(folds)
+# structure of the training set indices
+
+List of 10
+ $ Fold01: int [1:4141] 1 2 3 4 5 6 7 8 9 10 ...
+ $ Fold02: int [1:4140] 1 3 4 5 6 7 8 9 10 11 ...
+ $ Fold03: int [1:4141] 1 2 3 4 5 6 7 8 9 10 ...
+ $ Fold04: int [1:4142] 1 2 3 4 5 6 7 8 9 10 ...
+ $ Fold05: int [1:4140] 1 2 4 5 6 7 8 9 10 11 ...
+ $ Fold06: int [1:4142] 1 2 3 4 5 6 9 10 11 12 ...
+ $ Fold07: int [1:4141] 1 2 3 4 7 8 11 12 13 14 ...
+ $ Fold08: int [1:4141] 1 2 3 5 6 7 8 9 10 13 ...
+ $ Fold09: int [1:4140] 2 3 4 5 6 7 8 9 10 11 ...
+ $ Fold10: int [1:4141] 1 2 3 4 5 6 7 8 9 10 ...
+> folds.test<-createFolds(y=spam$type,k=10,list=TRUE,returnTrain=FALSE)
+> str(folds.test)
+# return the test set indices instead
+# note: returnTrain = FALSE is unnecessary as it is the default behavior
+#[only works when list=T] returnTrain=TRUE = returns the indices of the training sets
+#[default value when unspecified]returnTrain=FALSE = returns indices of the test sets
+List of 10
+ $ Fold01: int [1:460] 19 21 51 54 63 69 72 80 92 102 ...
+ $ Fold02: int [1:459] 5 15 23 26 28 29 33 34 42 45 ...
+ $ Fold03: int [1:460] 2 14 27 52 60 76 79 83 94 96 ...
+ $ Fold04: int [1:460] 18 24 25 31 38 75 82 87 93 97 ...
+ $ Fold05: int [1:460] 1 39 41 50 57 62 73 74 77 81 ...
+ $ Fold06: int [1:460] 4 11 16 22 35 53 55 67 68 78 ...
+ $ Fold07: int [1:460] 6 20 30 56 59 89 103 123 125 156 ...
+ $ Fold08: int [1:460] 8 9 17 43 44 49 64 70 86 105 ...
+ $ Fold09: int [1:461] 10 32 37 47 58 66 90 100 112 115 ...
+ $ Fold10: int [1:461] 3 7 12 13 36 40 46 48 65 71 ...
+> folds[[1]][1:10]
+# return first 10 elements of the first training set
+ [1]  1  2  3  4  5  6  7  8  9 10
+ 
+ # createResample(y=data$var, times=10, list=TRUE) = create 10 resamplings from the given data
+with replacement
+> set.seed(32323)
+# create 10 resamples
+>  folds<-createResample(y=spam$type,times=10,list=TRUE)
+> sapply(folds,length)
+Resample01 Resample02 Resample03 Resample04 Resample05 Resample06 Resample07 
+      4601       4601       4601       4601       4601       4601       4601 
+Resample08 Resample09 Resample10 
+      4601       4601       4601 
+# structure of the resamples (note some samples are repeated)
+> str(folds)
+List of 10
+ $ Resample01: int [1:4601] 1 2 3 3 3 5 5 7 8 12 ...
+ $ Resample02: int [1:4601] 4 5 7 8 9 10 11 14 14 14 ...
+ $ Resample03: int [1:4601] 1 1 2 3 3 4 4 4 4 4 ...
+ $ Resample04: int [1:4601] 1 2 2 3 4 4 4 5 6 6 ...
+ $ Resample05: int [1:4601] 1 2 2 3 3 5 8 9 12 12 ...
+ $ Resample06: int [1:4601] 1 2 3 5 6 6 7 7 10 12 ...
+ $ Resample07: int [1:4601] 1 1 1 1 2 3 5 6 8 11 ...
+ $ Resample08: int [1:4601] 2 4 5 6 7 8 8 9 9 11 ...
+ $ Resample09: int [1:4601] 3 3 3 6 7 8 8 9 9 11 ...
+ $ Resample10: int [1:4601] 2 2 3 5 5 7 8 10 10 10 ...
+> folds[[1]][1:10]
+ [1]  1  2  3  3  3  5  5  7  8 12
+# createTimeSlices(y=data, initialWindow=20, horizon=10) = creates training sets with specified
+window length and the corresponding test sets
+> set.seed(32323)
+> tme<-1:1000
+# create time series data
+>  folds<-createTimeSlices(y=tme,initialWindow=20,horizon=10)
+# create time slices
+> names(folds)
+# name of lists
+[1] "train" "test" 
+# first training set
+> folds$train[[1]]
+ [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20
+> folds$test[[1]]
+# first test set
+ [1] 21 22 23 24 25 26 27 28 29 30
