@@ -1,1 +1,77 @@
-
+ train(y ~ x, data=df, method="glm") = function to apply the machine learning algorithm to
+construct model from training data
+# returns the arguments of the default train function
+args(train.default)
+## function (x, y, method = "rf", preProcess = NULL, ..., weights = NULL,
+metric = ifelse(is.factor(y), "Accuracy", "RMSE"), maximize = ifelse(metric ==
+ "RMSE", FALSE, TRUE), trControl = trainControl(), tuneGrid = NULL,
+ tuneLength = 3)
+## NULL
+• train function has a large set of parameters, below are the default options
+– method="rf" = default algorithm is random forest for training a given data set; caret contains a
+large number of algorithms
+∗ names(getModelInfo()) = returns all the options for method argument
+∗ list of models and their information can be found here
+– preProcess=NULL = set preprocess options (see Preprocessing)
+– weights=NULL = can be used to add weights to observations, useful for unbalanced distribution (a
+lot more of one type than another)
+– metric=ifelse(is.factor(y), "Accuracy", "RMSE") = default metric for algorithm is Accuracy
+for factor variables, and RMSE, or root mean squared error, for continuous variables
+19
+∗ Kappa = measure of concordance (see Notable Measurements for Error – Binary
+Variables)
+∗ RSquared can also be used here as a metric, which represents R2
+from regression models (only
+useful for linear models)
+– maximize=ifelse(metric=="RMSE", FALSE, TRUE) = the algorithm should maximize accuracy
+and minimize RMSE
+– trControl=trainControl() = training controls for the model, more details below
+– tuneGrid=NULL
+– tuneLength=3
+# returns the default arguments for the trainControl object
+args(trainControl)
+## function (method = "boot", number = ifelse(grepl("cv", method),
+## 10, 25), repeats = ifelse(grepl("cv", method), 1, number),
+## p = 0.75, initialWindow = NULL, horizon = 1, fixedWindow = TRUE,
+## verboseIter = FALSE, returnData = TRUE, returnResamp = "final",
+## savePredictions = FALSE, classProbs = FALSE, summaryFunction = defaultSummary,
+## selectionFunction = "best", preProcOptions = list(thresh = 0.95,
+## ICAcomp = 3, k = 5), index = NULL, indexOut = NULL, timingSamps = 0,
+## predictionBounds = rep(FALSE, 2), seeds = NA, adaptive = list(min = 5,
+## alpha = 0.05, method = "gls", complete = TRUE), trim = FALSE,
+## allowParallel = TRUE)
+## NULL
+• trainControl creates an object that sets many options for how the model will be applied to the training
+data
+– Note: the default values are listed below but you can use them to set the parameters to your
+discretion
+– method="boot" =
+∗ "boot" = bootstrapping (drawing with replacement)
+∗ "boot632" = bootstrapping with adjustment
+∗ "cv" = cross validation
+∗ "repeatedcv" = repeated cross validation
+∗ "LOOCV" = leave one out cross validation
+– number=ifelse(grepl("cv", method),10, 25) = number of subsamples to take
+∗ number=10 = default for any kind of cross validation
+∗ number=25 = default for bootstrapping
+∗ Note: number should be increased when fine-tuning model with large number of parameter
+– repeats=ifelse(grepl("cv", method), 1, number) = numbers of times to repeat the subsampling
+∗ repeats=1 = default for any cross validation method
+∗ repeats=25 = default for bootstrapping
+– p=0.75 = default percentage of data to create training sets
+– initialWindow=NULL, horizon=1, fixedWindow=TRUE = parameters for time series data
+– verboseIter=FALSE = print the training logs
+– returnData=TRUE, returnResamp = “final”,
+– savePredictions=FALSE = save the predictions for each resample
+– classProbs=FALSE = return classification probabilities along with the predictions
+– summaryFunction=defaultSummary = default summary of the model,
+20
+– preProcOptions=list(thresh = 0.95, ICAcomp = 3, k = 5) = specifies preprocessing
+options for the model
+– predictionBounds=rep(FALSE, 2) = specify the range of the predicted value
+∗ for numeric predictions, predictionBounds=c(10, NA) would mean that any value lower
+than 10 would be treated as 10 and no upper bounds
+– seeds=NA = set the seed for the operation
+∗ Note: setting this is important when you want to reproduce the same results when the train
+function is run
+– allowParallel=TRUE = sets for parallel processing/computations
