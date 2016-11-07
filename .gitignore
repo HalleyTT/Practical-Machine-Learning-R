@@ -1,0 +1,33 @@
+Data Splitting Functions
+A series of test/training partitions are created using createDataPartition while createResample creates one or more bootstrap samples. createFolds splits the data into kgroups while createTimeSlices creates cross-validation sample information to be used with time series data.
+Keywords
+utilities
+Usage
+createDataPartition(y, times = 1, p = 0.5, list = TRUE, groups = min(5, length(y)))
+
+createFolds(y, k = 10, list = TRUE, returnTrain = FALSE)
+
+createTimeSlices(y, initialWindow, horizon = 1, fixedWindow = TRUE, skip = 0)
+Arguments
+y
+a vector of outcomes. For createTimeSlices, these should be in chronological order.
+times
+the number of partitions to create
+p
+the percentage of data that goes to training
+list
+logical - should the results be in a list (TRUE) or a matrix with the number of rows equal to floor(p * length(y)) and times columns.
+groups
+for numeric y, the number of breaks in the quantiles (see below)
+k
+an integer for the number of folds.
+returnTrain
+a logical. When true, the values returned are the sample positions corresponding to the data used during training. This argument only works in conjunction with list = TRUE
+initialWindow
+The initial number of consecutive values in each training set sample
+horizon
+The number of consecutive values in test set sample
+fixedWindow
+A logical: if FALSE, the training set always start at the first sample.
+skip
+An integer specifying how many (if any) resamples to skip to thin the total amount.
