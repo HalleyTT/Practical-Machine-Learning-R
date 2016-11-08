@@ -7,8 +7,8 @@ metric = ifelse(is.factor(y), "Accuracy", "RMSE"), maximize = ifelse(metric ==
  "RMSE", FALSE, TRUE), trControl = trainControl(), tuneGrid = NULL,
  tuneLength = 3)
 ## NULL
-• train function has a large set of parameters, below are the default options
-– method="rf" = default algorithm is random forest for training a given data set; caret contains a
+train function has a large set of parameters, below are the default options
+ method="rf" = default algorithm is random forest for training a given data set; caret contains a
 large number of algorithms
 ∗ names(getModelInfo()) = returns all the options for method argument
 ∗ list of models and their information can be found here
